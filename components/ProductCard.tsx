@@ -4,46 +4,55 @@ import { SignedIn, SignedOut } from '@clerk/nextjs'
 import React from 'react'
 import { Button } from './ui/button'
 import { useCartStore } from '@/app/store/cartStore'
-import { IndianRupee } from 'lucide'
 import { IndianRupeeIcon } from 'lucide-react'
+import { products } from '@/app/data/products'
+import Link from 'next/link'
 
 const ProductCard = () => {
-
   // Use addItem state to add Item
   const addItem = useCartStore((state) => state.addItem)
 
-  // Dummy Product
-  const product = {
-    id: "1",
-    name: "IPhone 17 pro max",
-    price: 195000,
-    image: "This is image",
-  }
-
   return (
     <div>
+      {products.map((p) => (
+        /* Added return/parenthesis for the map function */
+        <div key={p.id}>
+          {/* Display Product Name */}
+          <h3>{p.name}</h3>
+          <p><IndianRupeeIcon size={16} />{p.price}</p>
 
-      {/* Display Product Name */}
-      <h3>{product.name}</h3>
-      <p><IndianRupeeIcon />{product.price}</p>
+          {p.stock === 0 && (
+            <p className='text-red-500 text-sm'>Out of Stock</p>
+          )}
 
-      {/* If User is SignedIn then user can add cart items */}
-      <SignedIn>
-        <Button
-          // In onclick function product details and quantity is given
-          onClick={() => addItem({ ...product, quantity: 1 })}
-          className="mt-2 bg-black text-white px-4 py-2">
-          Add To Cart
-        </Button>
-      </SignedIn>
+          <div className="flex gap-2">
+            <Link
+              href={`/products/${p.id}`}
+              className="underline text-sm"
+            >
+              View
+            </Link>
+            
+          </div>
+          {/* If User is SignedIn then user can add cart items */}
+          <SignedIn>
+            <Button
+              /* In onclick function product details and quantity is given */
+              onClick={() => addItem({ ...p, quantity: 1 })}
+              className="mt-2 bg-black text-white px-4 py-2"
+            >
+              Add To Cart
+            </Button>
+          </SignedIn>
 
-      {/* If User is not there , user must have to login to add cart items */}
-      <SignedOut>
-        <p className="text-sm text-gray-500">
-          Login to add items to cart
-        </p>
-      </SignedOut>
-
+          {/* If User is not there, user must login to add cart items */}
+          <SignedOut>
+            <p className="text-sm text-gray-500">
+              Login to add items to cart
+            </p>
+          </SignedOut>
+        </div>
+      ))}
     </div>
   )
 }
