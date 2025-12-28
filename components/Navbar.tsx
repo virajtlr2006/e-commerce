@@ -1,10 +1,13 @@
 'use client'
 
+import { useCartStore } from '@/app/store/cartStore'
 import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
 import Link from 'next/link'
-import React from 'react'
 
 const Navbar = () => {
+
+    const totalItems = useCartStore((state) => state.totalItems())
+
     return (
         <div>
             {/* Navbar */}
@@ -23,7 +26,8 @@ const Navbar = () => {
 
                     {/* Shows user profile icon if user is Logged In */}
                     <SignedIn>
-                        <Link href="/cart">Cart</Link>
+                        {/* Shows total cart items in Navbar */}
+                        <Link href="/cart">Cart({totalItems})</Link>
                         <UserButton />
                     </SignedIn>
                 </div>
