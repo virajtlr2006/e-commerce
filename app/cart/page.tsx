@@ -3,8 +3,11 @@
 import React from 'react'
 
 const page = () => {
+
   return (
-    <div>Cart Page</div>
+    <div>
+      Cart
+    </div>
   )
 }
 
