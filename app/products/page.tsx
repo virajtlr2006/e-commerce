@@ -2,8 +2,20 @@
 
 import ProductCard from '@/components/ProductCard'
 import { products } from '../data/products'
+import { FetchProductsAction } from '@/actions/ProductAction'
+import { useEffect } from 'react'
 
 const page = () => {
+
+  useEffect(() => {
+    FetchAllProducts()
+  }, [])
+  
+
+  const FetchAllProducts = async () => {
+    const products=await FetchProductsAction()
+  }
+
   return (
     <div className='p-10'>
       <h1 className="text-2xl font-bold mb-6">Products</h1>
