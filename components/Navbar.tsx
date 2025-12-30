@@ -18,6 +18,8 @@ const Navbar = () => {
 
                 <div className="flex gap-4">
 
+                    <Link href="/products">All Products</Link>
+                    
                     {/* Show if the user is not signed yet */}
                     <SignedOut>
                         <Link href="/sign-in">Login</Link>
