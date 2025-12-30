@@ -5,5 +5,6 @@ import { db } from ".."
 
 export const FetchProductsAction = async () => {
     const all = await db.select().from(productTable)
-    console.log(all)
+    // console.log(all)
+    return all
 }
