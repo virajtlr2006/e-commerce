@@ -1,59 +1,91 @@
 "use client";
 
+import { useCurrentUser } from "@/hook/hook";
+import { useCartStore } from "@/app/store/cartStore";
+import { CreateOrderAction } from "@/actions/OrderAction"; 
+import { useForm } from "react-hook-form";
 import { useState } from "react";
 
+type CheckoutFormData = {
+  name: string;
+  address: string;
+  phone: string;
+};
+
 export default function CheckoutPage() {
-  const [form, setForm] = useState({
-    name: "",
-    address: "",
-    phone: "",
-  });
+  const { email,fullName} = useCurrentUser();
+  const { items, clearCart } = useCartStore();
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: any) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<CheckoutFormData>();
 
-    if (!form.name || !form.address || !form.phone) {
-      alert("All fields required");
-      return;
+  const onSubmit = async (data: CheckoutFormData) => {
+    try {
+      if (!email) {
+        alert("Please login to place an order");
+        return;
+      }
+
+      setLoading(true)
+      await CreateOrderAction(email,fullName || "",items);
+      
+      alert("Order placed successfully!");
+      clearCart();
+    } catch (error: any) {
+      alert(error.message || "Something went wrong");
     }
-
-    alert("Order placed (static)");
+    finally{
+      setLoading(false)
+    }
   };
 
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={handleSubmit(onSubmit)}
       className="p-10 max-w-md space-y-4"
     >
       <h1 className="text-xl font-bold">Checkout</h1>
 
-      <input
-        placeholder="Name"
-        className="border p-2 w-full"
-        onChange={(e) =>
-          setForm({ ...form, name: e.target.value })
-        }
-      />
+      <div>
+        <input
+          {...register("name", { required: "Name is required" })}
+          placeholder="Name"
+          className="border p-2 w-full"
+        />
+        {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
+      </div>
 
-      <input
-        placeholder="Address"
-        className="border p-2 w-full"
-        onChange={(e) =>
-          setForm({ ...form, address: e.target.value })
-        }
-      />
+      <div>
+        <input
+          {...register("address", { required: "Address is required" })}
+          placeholder="Address"
+          className="border p-2 w-full"
+        />
+        {errors.address && <p className="text-red-500 text-sm">{errors.address.message}</p>}
+      </div>
 
-      <input
-      type="number"
-        placeholder="Phone"
-        className="border p-2 w-full"
-        onChange={(e) =>
-          setForm({ ...form, phone: e.target.value })
-        }
-      />
+      <div>
+        <input
+          type="number"
+          {...register("phone", { 
+            required: "Phone is required",
+            minLength: { value: 10, message: "Phone must be at least 10 digits" }
+          })}
+          placeholder="Phone"
+          className="border p-2 w-full"
+        />
+        {errors.phone && <p className="text-red-500 text-sm">{errors.phone.message}</p>}
+      </div>
 
-      <button className="bg-black text-white px-4 py-2">
-        Place Order
+      <button 
+        disabled={isSubmitting}
+        className="bg-black text-white px-4 py-2 disabled:bg-gray-400"
+      >
+        {isSubmitting ? "Processing..." : "Place Order"}
       </button>
     </form>
   );

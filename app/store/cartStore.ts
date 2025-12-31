@@ -1,89 +1,73 @@
 import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware"; // 1. Import middleware
 
 export interface CartItem {
-    id: string;
+    id: number;
     name: string;
     price: number;
     quantity: number;
-    image: string;
-    stock:number
+    image: string | null;
+    stock: number;
 }
 
 export interface CartStore {
-    items: CartItem[],
-
-    // To add item in Cart
+    items: CartItem[];
     addItem: (item: CartItem) => void;
-    removeItem: (id: string) => void;
-    updateQuantity: (id: string, quantity: number) => void;
-
+    removeItem: (id: number) => void;
+    updateQuantity: (id: number, quantity: number) => void;
     clearCart: () => void;
-
     totalItems: () => number;
     totalPrice: () => number;
 }
 
-// set:Used to change the data
-// get:Used to read the current data
-export const useCartStore = create<CartStore>()((set, get) => ({
+// 2. Wrap your store creator with persist()
+export const useCartStore = create<CartStore>()(
+    persist(
+        (set, get) => ({
+            items: [],
 
-    // 📄List where the cart Stores its Products
-    items: [],
+            addItem: (item) => {
+                const existing = get().items.find((i) => i.id === item.id);
+                if (existing) {
+                    set({
+                        items: get().items.map((i) =>
+                            i.id === item.id
+                                ? { ...i, quantity: i.quantity + item.quantity }
+                                : i
+                        ),
+                    });
+                } else {
+                    set({ items: [...get().items, item] });
+                }
+            },
 
+            removeItem: (id: number) => {
+                set({
+                    items: get().items.filter((item) => item.id !== id),
+                });
+            },
 
-    // ➕Add Items to Cart
-    addItem: (item) => {
+            updateQuantity: (id, quantity) => {
+                set({
+                    items: get().items.map((item) =>
+                        item.id === id ? { ...item, quantity } : item
+                    ),
+                });
+            },
 
-        //🇦🇬 Checks Whether the items exists in cart or not
-        const existing = get().items.find((i) => i.id === item.id);
+            clearCart: () => {
+                set({ items: [] });
+            },
 
-        // If exist Increase the quantity as per item.quantity
-        if (existing) {
-            set({
-                items: get().items.map((i) =>
-                    i.id === item.id
-                        ? { ...i, quantity: i.quantity + item.quantity }
-                        : i
-                ),
-            });
-            //   If new Item , set to the Cart
-        } else {
-            set({ items: [...get().items, item] });
+            totalItems: () =>
+                get().items.reduce((sum, item) => sum + item.quantity, 0),
+
+            totalPrice: () =>
+                get().items.reduce((sum, item) => sum + item.price * item.quantity, 0),
+        }),
+        {
+            name: "cart-storage", // 3. Unique name for the item in localStorage
+            storage: createJSONStorage(() => localStorage), // 4. (Optional) Defaults to localStorage
         }
-    },
-
-
-    // ➖Remove Items from Cart
-    removeItem: (id) => {
-        // Updates cart after by showing all items expect the element whose id is matched
-        set({
-            items: get().items.filter((item) => item.id !== id),
-        });
-    },
-
-
-    //🖊️ Update Items Quantity of Cart
-    updateQuantity: (id, quantity) => {
-
-        set({
-            // If id is matched , update the new quantity
-            items: get().items.map((item) =>
-                item.id === id ? { ...item, quantity } : item)
-        });
-    },
-
-
-    // Clear all the items in the Cart by making items[] empty
-    clearCart : () => {set({items :[]})},
-
-
-    // Total Cart Items
-    totalItems : () =>
-        // Counting starts from 0 and then start adding every items included in the cart
-         get().items.reduce((sum,item) => sum + item.quantity , 0),
-
-
-    // 💲Total Price of the Cart Items
-    totalPrice : () =>
-        get().items.reduce((sum,item) => sum + item.price* item.quantity,0)
-}))
+    )
+);

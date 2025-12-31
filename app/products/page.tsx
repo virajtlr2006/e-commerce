@@ -7,24 +7,28 @@ import { useProductStore } from '../store/productStore'
 
 const page = () => {
 
-const {setProducts,product : allProducts} = useProductStore()
+  const { setProducts, product: allProducts } = useProductStore()
 
   useEffect(() => {
     FetchAllProducts()
   }, [])
-  
 
-
-  const FetchAllProducts = async () => {
-    const products =await FetchProductsAction() 
-    setProducts(products)
-    console.log(products)
-  }
+const FetchAllProducts = async () => {
+    // Check if products already exist to avoid unnecessary DB calls
+    if (allProducts.length === 0) {
+      try {
+        const products = await FetchProductsAction();
+        setProducts(products);
+      } catch (err) {
+        console.error("Database connection failed:", err);
+      }
+    }
+  };
 
   useEffect(() => {
     // console.log(product)
   }, [allProducts])
-  
+
 
   return (
     <div className='p-10'>
@@ -32,7 +36,7 @@ const {setProducts,product : allProducts} = useProductStore()
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {allProducts.map((p) => (
-          <ProductCard key={p.id} />
+          <ProductCard products={allProducts} key={p.id} />
         ))}
       </div>
     </div>

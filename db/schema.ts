@@ -4,11 +4,13 @@ import {
   varchar,
   timestamp,
 } from "drizzle-orm/pg-core";
+import { Interface } from "readline";
 
 export const productTable = pgTable("products", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   name: varchar().notNull(),
   price: integer().notNull(),
+  image: varchar().default(""),
   stock: integer().notNull(),
   description: varchar(),
   category: varchar(),
@@ -30,3 +32,5 @@ export const orderItemsTable = pgTable("order_items", {
   quantity: integer().notNull(),
   price: integer().notNull(),
 });
+
+export type Product =  typeof productTable.$inferSelect

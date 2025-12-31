@@ -1,17 +1,21 @@
+import { Product } from "@/db/schema";
 import { create } from "zustand";
-export interface ProductItem {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-  image: string;
-  stock: number;
-}
+import { persist, createJSONStorage } from "zustand/middleware"; // 1. Import
+
 export interface ProductStore {
-  product: ProductItem[];   
-  setProducts: (product: ProductItem[]) => void;
+  product: Product[];   
+  setProducts: (product: Product[]) => void;
 }
-export const useProductStore = create<ProductStore>((set) => ({
-  product: [],
-  setProducts: (newProduct) => set({ product: newProduct }),
-}));
+
+export const useProductStore = create<ProductStore>()(
+  persist(
+    (set) => ({
+      product: [],
+      setProducts: (newProduct) => set({ product: newProduct }),
+    }),
+    {
+      name: "product-cache", // Unique name for local storage
+      storage: createJSONStorage(() => localStorage),
+    }
+  )
+);

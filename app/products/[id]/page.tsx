@@ -1,18 +1,22 @@
 'use client'
 
-import { products } from '@/app/data/products'
 import React from 'react'
 import ProductDetailClient from './productdetailclient'
 import { useParams } from 'next/navigation'
+import { useStore } from 'zustand'
+import { useCartStore } from '@/app/store/cartStore'
+import { useProductStore } from '@/app/store/productStore'
 
 const page = () => {
-  const {id} = useParams()
-  const product = products.find((p) => p.id === id)
 
-  if(!product) return <div>Product Not Found</div>
+  const {product} = useProductStore()
+  const {id} = useParams()
+  const FetchProductByID = product.find((p) => p.id === Number(id))
+
+  if(!FetchProductByID) return <div>Product Not Found</div>
   return (
     <div>
-      <ProductDetailClient p={product}/>
+      <ProductDetailClient p={FetchProductByID}/>
     </div>
   )
 }

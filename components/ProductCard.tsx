@@ -5,10 +5,10 @@ import React from 'react'
 import { Button } from './ui/button'
 import { useCartStore } from '@/app/store/cartStore'
 import { IndianRupeeIcon } from 'lucide-react'
-import { products } from '@/app/data/products'
 import Link from 'next/link'
+import { Product } from '@/db/schema'
 
-const ProductCard = () => {
+const ProductCard = ({products}:{products:Product[]}) => {
   // Use addItem state to add Item
   const addItem = useCartStore((state) => state.addItem)
 
@@ -38,7 +38,7 @@ const ProductCard = () => {
           <SignedIn>
             <Button
               /* In onclick function product details and quantity is given */
-              onClick={() => addItem({ ...p, quantity: 1 })}
+              onClick={() => addItem({ ...p, quantity: 1})}
               className="mt-2 bg-black text-white px-4 py-2"
             >
               Add To Cart
