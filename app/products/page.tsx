@@ -8,6 +8,7 @@ import { useProductStore } from '../store/productStore'
 const page = () => {
 
   const { setProducts, product: allProducts } = useProductStore()
+  
 
   useEffect(() => {
     FetchAllProducts()
@@ -39,6 +40,7 @@ const FetchAllProducts = async () => {
           <ProductCard products={allProducts} key={p.id} />
         ))}
       </div>
+      
     </div>
   )
 }
